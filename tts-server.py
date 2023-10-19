@@ -1,12 +1,8 @@
 import torch
 from TTS.api import TTS
 from gst_tts_source import GStreamerSource
-from boombox import GstPlayFile
-import yaml
 import json
 import paho.mqtt.client as mqtt
-import logging
-from time import sleep
 from threading import Thread
 from queue import Queue
 
@@ -17,12 +13,11 @@ device = "cpu"
 class MqttTTSServer():
   # Init TTS with the target model name
   tts = None
-  audio_dir = "/tmp/"
   in_topic = "tts/behaviour"
   out_topic = "dialogue/messages"
   model_name = "tts_models/de/thorsten/tacotron2-DDC"
   msg_queue = Queue()
-  play_thread = None
+  play_thread: Thread = None
 
   def __init__(self, config):
     self.config = config
@@ -30,8 +25,6 @@ class MqttTTSServer():
       self.in_topic = config['in_topic']
     if 'channels' in config:
       self.out_topic = config['out_topic']
-    if 'audio_dir' in config:
-      self.audio_dir = config['audio_dir']
     if 'model_name' in config:
       self.model_name = config['model_name']
     self.tts = TTS(model_name=self.model_name, progress_bar=False).to(device)
@@ -45,7 +38,9 @@ class MqttTTSServer():
     self.client.on_subscribe = self._on_subscribe
 
   def mqtt_connect(self):
-    host=self.config['mqtt_address']
+    host = 'localhost'
+    if 'mqtt_address' in self.config:
+      host = self.config['mqtt_address']
     print("connecting to: " + host + " ", end="")
     self.client.connect(host)
     self.client.subscribe(self.in_topic)
@@ -87,7 +82,8 @@ class MqttTTSServer():
   def watch_queue(self):
     while self.is_running:
       behaviour = self.msg_queue.get(block=True)
-      self._tts(behaviour["text"], behaviour["id"])
+      if (behaviour is not None):
+        self._tts(behaviour["text"], behaviour["id"])
 
   def run(self):
     try:
@@ -96,14 +92,15 @@ class MqttTTSServer():
       self.play_thread.start()
       self.mqtt_connect()
     except Exception as e:
-      print(e)
+      print('Error in initialization: {}'.format(e))
     finally:
       print('Disconnecting...')
       self.is_running = False
+      self.msg_queue.put(None)
       self.mqtt_disconnect()
 
 if __name__ == '__main__':
   #logging.basicConfig(filename='example.log', encoding='utf-8', level='DEBUG',
   #                    format=('%(levelname)s %(funcName)s:%(lineno)s %(message)s'),)
-  config = { "mqtt_address" : "localhost" }
+  config = { }
   MqttTTSServer(config).run()

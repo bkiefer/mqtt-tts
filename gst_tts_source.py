@@ -13,9 +13,7 @@ from gi.repository import Gst, GstApp, GLib
 # gst-launch-1.0 appsrc ! audioconvert ! audio/x-raw,format=S16LE,channels=1,rate=16000 ! fakesink silent = TRUE
 
 PIPELINE = """appsrc name=src ! audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved ! audioconvert ! pulsesink"""
-
 CAPS = "audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved"
-
 
 def ndarray_to_gst_buffer(arr: list[np.float32]) -> Gst.Buffer:
     """Convert numpy array to Gst.Buffer"""
@@ -35,8 +33,6 @@ class GStreamerSource(object):
         self.player = Gst.parse_launch(PIPELINE)
         self.player.set_auto_flush_bus(True)
         self.appsrc = self.player.get_by_name("src")
-
-
 
         self.bus = self.player.get_bus()
         self.bus.add_signal_watch()
@@ -77,7 +73,6 @@ class GStreamerSource(object):
 
     def stop(self):
         self.player.set_state(Gst.State.NULL)
-        self.player.shutdown()
 
 ####### Unused code, several attempts to make it work or test gstreamer #####
 
