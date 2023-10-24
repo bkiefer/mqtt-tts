@@ -1,7 +1,7 @@
 # Prerequisites for installation (tested on Ubuntu 22.04 [Mate])
 
 ```
-sudo apt install python3-gst-1.0 libgirepository1.0-dev libcairo2-dev
+sudo apt install python3-gst-1.0 libgirepository1.0-dev libcairo2-dev python3-pip espeak
 
 conda create -n tts
 conda activate tts
