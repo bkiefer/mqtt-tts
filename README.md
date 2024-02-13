@@ -8,6 +8,14 @@ conda activate tts
 pip install -r requirements.txt
 ```
 
+To download the TTS model, do
+
+```
+tts --text 'Dies ist ein Test' --model_name 'tts_models/de/thorsten/tacotron2-DDC'
+```
+
+This will generate a wav file that can be played to check if it works.
+
 # Running the server
 
 Start your favorite MQTT broker first. Then:

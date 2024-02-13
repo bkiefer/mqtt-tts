@@ -17,8 +17,8 @@ CAPS = "audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved"
 
 def ndarray_to_gst_buffer(arr: list[np.float32]) -> Gst.Buffer:
     """Convert numpy array to Gst.Buffer"""
-    buf = np.array(arr)
-    buf = np.array(arr) * 32768
+    #buf = np.array(arr)
+    buf = np.array(arr) * 32767
     buf = (np.rint(buf)).astype(np.int16)
     return Gst.Buffer.new_wrapped(buf.tobytes())
 
