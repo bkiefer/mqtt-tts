@@ -65,9 +65,12 @@ class MqttTTSServer():
   def _tts(self, text: str, id: str):
     # Run TTS
     self.tts_start(id)
-    wav = self.tts.tts(text=text)
-    duration_ms = 0.1 + len(wav)/22.050
-    GStreamerSource().send_chunk(wav, duration_ms=duration_ms)
+    if not text:
+      print("WARNING: no TEXT for TTS!")
+    else:
+      wav = self.tts.tts(text=text)
+      duration_ms = 0.1 + len(wav)/22.050
+      GStreamerSource().send_chunk(wav, duration_ms=duration_ms)
     self.tts_end(id)
 
   def tts_start(self, id):
@@ -83,7 +86,11 @@ class MqttTTSServer():
     while self.is_running:
       behaviour = self.msg_queue.get(block=True)
       if (behaviour is not None):
-        self._tts(behaviour["text"], behaviour["id"])
+        try:
+          self._tts(behaviour["text"], behaviour["id"])
+        except KeyError as ex:
+          print("Error {}: {}".format(type(ex), ex))
+
 
   def run(self):
     try:

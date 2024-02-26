@@ -56,7 +56,7 @@ class GStreamerSource(object):
 
         result = self.player.set_state(Gst.State.PLAYING)
         if result != Gst.StateChangeReturn.ASYNC:
-            raise RuntimeError('player.set_state returned: %r' % result)
+            raise RuntimeError('player.set_state returned: %r' % str(result))
         result = self.appsrc.push_buffer(ndarray_to_gst_buffer(buffer))
         result = self.appsrc.end_of_stream()
         # in nanoseconds
