@@ -26,6 +26,20 @@ Send this message to `tts/behaviour`, e.g., with MQTT-Explorer
 
     { "id": 222, "text": "Das ist ein wirklich total unsinniger text" }
 
+The server currently uses the default pulseaudio sink. To set this to the ReSpeaker device, you execute the following on the command line:
+
+```
+pacmd set-default-sink 'alsa_output.usb-SEEED_ReSpeaker_4_Mic_Array__UAC1.0_-00.analog-stereo'
+```
+
+To check, if ReSpeaker is the default, use this;
+
+```
+pacmd list-sinks | grep -e 'index:' -e device.string -e 'name:'
+```
+
+
+
 # Training a new model
 
 docker run -ti --rm --gpus all --shm-size=32g --entrypoint /bin/bash -v `pwd`:/local/ ghcr.io/coqui-ai/tts
