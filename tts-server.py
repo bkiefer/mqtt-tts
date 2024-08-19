@@ -3,35 +3,30 @@ from TTS.api import TTS
 from gst_tts_source import GStreamerSource
 import json
 import paho.mqtt.client as mqtt
+from paho.mqtt.enums import CallbackAPIVersion
 from threading import Thread
 from queue import Queue
 
 # Get device
-device = "cuda" if torch.cuda.is_available() else "cpu"
+#device = "cuda" if torch.cuda.is_available() else "cpu"
 device = "cpu"
 
 class MqttTTSServer():
-  # Init TTS with the target model name
-  tts = None
-  in_topic = "tts/behaviour"
-  out_topic = "dialogue/messages"
-  model_name = "tts_models/de/thorsten/tacotron2-DDC"
-  msg_queue = Queue()
-  play_thread: Thread = None
 
   def __init__(self, config):
+    self.msg_queue = Queue()
     self.config = config
-    if 'in_topic' in config:
-      self.in_topic = config['in_topic']
-    if 'channels' in config:
-      self.out_topic = config['out_topic']
-    if 'model_name' in config:
-      self.model_name = config['model_name']
+    self.in_topic = config['in_topic'] if 'in_topic' in config \
+      else "tts/behaviour"
+    self.out_topic = config['out_topic'] if 'channels' in config \
+      else "dialogue/messages"
+    self.model_name = config['model_name'] if 'model_name' in config \
+      else "tts_models/de/thorsten/tacotron2-DDC"
     self.tts = TTS(model_name=self.model_name, progress_bar=False).to(device)
     self.__init_mqtt_client()
 
   def __init_mqtt_client(self):
-    self.client = mqtt.Client()
+    self.client = mqtt.Client(CallbackAPIVersion.VERSION2)
     # self.client.username_pw_set(self.mqtt_username, self.mqtt_password)
     self.client.on_message = self._on_message
     self.client.on_connect = self._on_connect
@@ -50,11 +45,12 @@ class MqttTTSServer():
     self.client.loop_stop()
     self.client.disconnect()
 
-  def _on_connect(self, client, userdata, flags, rc):
-    print('CONNACK received with code %d. ' % (rc), end="")
+  def _on_connect(self, client, userdata, flags, rc, properties):
+    print('CONNACK received with code %s. ' % str(rc), end="")
 
-  def _on_subscribe(self, client, userdata, mid, granted_qos):
-    print("Subscribed: "+str(mid)+" "+str(granted_qos))
+  def _on_subscribe(self, client, userdata, mid, reason_code_list, properties):
+    print("Subscribed: "+str(mid)+" "
+          +str(reason_code_list) +" "+str(properties))
 
   def _on_message(self, client, userdata, message):
     #print("Received message '" + str(message.payload) + "' on topic '"
@@ -90,7 +86,6 @@ class MqttTTSServer():
           self._tts(behaviour["text"], behaviour["id"])
         except KeyError as ex:
           print("Error {}: {}".format(type(ex), ex))
-
 
   def run(self):
     try:
