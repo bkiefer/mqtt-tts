@@ -1,4 +1,3 @@
-import torch
 from TTS.api import TTS
 from gst_tts_source import GStreamerSource
 import json
@@ -6,15 +5,19 @@ import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 from threading import Thread
 from queue import Queue
+import sys
+import yaml
+
 
 # Get device
-#device = "cuda" if torch.cuda.is_available() else "cpu"
+# device = "cuda" if torch.cuda.is_available() else "cpu"
 device = "cpu"
+
 
 class MqttTTSServer():
 
   def __init__(self, config):
-    self.msg_queue = Queue()
+    self.queue = Queue()
     self.config = config
     self.in_topic = config['in_topic'] if 'in_topic' in config \
       else "tts/behaviour"
@@ -49,11 +52,11 @@ class MqttTTSServer():
     print('CONNACK received with code %s. ' % str(rc), end="")
 
   def _on_subscribe(self, client, userdata, mid, reason_code_list, properties):
-    print("Subscribed: "+str(mid)+" "
-          +str(reason_code_list) +" "+str(properties))
+    print("Subscribed: " + str(mid) + " "
+          + str(reason_code_list) + " " + str(properties))
 
   def _on_message(self, client, userdata, message):
-    #print("Received message '" + str(message.payload) + "' on topic '"
+    # print("Received message '" + str(message.payload) + "' on topic '"
     #    + message.topic + "' with QoS " + str(message.qos))
     behaviour = json.loads(message.payload)
     self.msg_queue.put(behaviour)
@@ -104,5 +107,9 @@ class MqttTTSServer():
 if __name__ == '__main__':
   #logging.basicConfig(filename='example.log', encoding='utf-8', level='DEBUG',
   #                    format=('%(levelname)s %(funcName)s:%(lineno)s %(message)s'),)
-  config = { }
+  config = {}
+  if len(sys.argv) > 1:
+    with open(sys.argv[1], 'r') as f:
+      config = yaml.safe_load(f)
+
   MqttTTSServer(config).run()
