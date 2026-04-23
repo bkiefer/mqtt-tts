@@ -59,7 +59,7 @@ class MqttTTSServer():
     # print("Received message '" + str(message.payload) + "' on topic '"
     #    + message.topic + "' with QoS " + str(message.qos))
     behaviour = json.loads(message.payload)
-    self.msg_queue.put(behaviour)
+    self.queue.put(behaviour)
 
   def _tts(self, text: str, id: str):
     # Run TTS
@@ -69,7 +69,7 @@ class MqttTTSServer():
     else:
       wav = self.tts.tts(text=text)
       duration_ms = 0.1 + len(wav)/22.050
-      GStreamerSource().send_chunk(wav, duration_ms=duration_ms)
+      GStreamerSource().send_chunk(wav, duration_ms=int(duration_ms))
     self.tts_end(id)
 
   def tts_start(self, id):
@@ -83,7 +83,7 @@ class MqttTTSServer():
 
   def watch_queue(self):
     while self.is_running:
-      behaviour = self.msg_queue.get(block=True)
+      behaviour = self.queue.get(block=True)
       if (behaviour is not None):
         try:
           self._tts(behaviour["text"], behaviour["id"])
@@ -101,7 +101,7 @@ class MqttTTSServer():
     finally:
       print('Disconnecting...')
       self.is_running = False
-      self.msg_queue.put(None)
+      self.queue.put(None)
       self.mqtt_disconnect()
 
 if __name__ == '__main__':
