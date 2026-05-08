@@ -1,65 +1,48 @@
+#!/usr/bin/env python
 from TTS.api import TTS
 from gst_tts_source import GStreamerSource
 import json
-import paho.mqtt.client as mqtt
-from paho.mqtt.enums import CallbackAPIVersion
 from threading import Thread
 from queue import Queue
 import sys
 import yaml
+import logging
 
+logger: logging.Logger
+logger = logging.getLogger(__file__)
+
+from mqtt_client import MqttClient
 
 # Get device
 # device = "cuda" if torch.cuda.is_available() else "cpu"
 device = "cpu"
 
+class MqttTTSServer(MqttClient):
+  def _on_control_msg(self, client, userdata, message):
+    message = message.payload.decode()
+    logger.info(f'control message: {message}')
+    match message:
+      case 'exit':
+        self.stop()
 
-class MqttTTSServer():
-
-  def __init__(self, config):
-    self.queue = Queue()
-    self.config = config
-    self.in_topic = config['in_topic'] if 'in_topic' in config \
-      else "tts/behaviour"
-    self.out_topic = config['out_topic'] if 'channels' in config \
-      else "dialogue/messages"
-    self.model_name = config['model_name'] if 'model_name' in config \
-      else "tts_models/de/thorsten/tacotron2-DDC"
-    self.tts = TTS(model_name=self.model_name, progress_bar=False).to(device)
-    self.__init_mqtt_client()
-
-  def __init_mqtt_client(self):
-    self.client = mqtt.Client(CallbackAPIVersion.VERSION2)
-    # self.client.username_pw_set(self.mqtt_username, self.mqtt_password)
-    self.client.on_message = self._on_message
-    self.client.on_connect = self._on_connect
-    self.client.on_subscribe = self._on_subscribe
-
-  def mqtt_connect(self):
-    host = 'localhost'
-    if 'mqtt_address' in self.config:
-      host = self.config['mqtt_address']
-    print("connecting to: " + host + " ", end="")
-    self.client.connect(host)
-    self.client.subscribe(self.in_topic)
-    self.client.loop_forever()
-
-  def mqtt_disconnect(self):
-    self.client.loop_stop()
-    self.client.disconnect()
-
-  def _on_connect(self, client, userdata, flags, rc, properties):
-    print('CONNACK received with code %s. ' % str(rc), end="")
-
-  def _on_subscribe(self, client, userdata, mid, reason_code_list, properties):
-    print("Subscribed: " + str(mid) + " "
-          + str(reason_code_list) + " " + str(properties))
-
-  def _on_message(self, client, userdata, message):
+  def _on_behaviour_message(self, client, userdata, message):
     # print("Received message '" + str(message.payload) + "' on topic '"
     #    + message.topic + "' with QoS " + str(message.qos))
     behaviour = json.loads(message.payload)
     self.queue.put(behaviour)
+
+  def __init__(self, config):
+    super().__init__('tts', config.get('mqtt') or {})
+    self.is_running = True
+    self.queue = Queue()
+    self.config = config
+    in_topic = config.get('in_topic') or self.with_pid("behaviour")
+    self.topics[in_topic] = self._on_behaviour_message
+    self.topics[self.with_pid('control')] = self._on_control_msg
+    self.out_topic = config.get('out_topic') or "dialogue/messages"
+    self.model_name = config['model_name'] if 'model_name' in config \
+      else "tts_models/de/thorsten/tacotron2-DDC"
+    self.tts = TTS(model_name=self.model_name, progress_bar=False).to(device)
 
   def _tts(self, text: str, id: str):
     # Run TTS
@@ -90,19 +73,22 @@ class MqttTTSServer():
         except KeyError as ex:
           print("Error {}: {}".format(type(ex), ex))
 
-  def run(self):
-    try:
-      self.is_running = True
-      self.play_thread = Thread(target=self.watch_queue, daemon=True)
-      self.play_thread.start()
-      self.mqtt_connect()
-    except Exception as e:
-      print('Error in initialization: {}'.format(e))
-    finally:
-      print('Disconnecting...')
+  def stop(self):
+    if self.is_running:
       self.is_running = False
       self.queue.put(None)
+
+  def run(self):
+    try:
+      self.mqtt_connect()
+      self.watch_queue()
+    except Exception as e:
+      print('Error in initialization: {}'.format(e))
+      self.stop()
+    finally:
+      print('Disconnecting...')
       self.mqtt_disconnect()
+
 
 if __name__ == '__main__':
   #logging.basicConfig(filename='example.log', encoding='utf-8', level='DEBUG',

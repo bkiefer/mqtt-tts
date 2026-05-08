@@ -1,0 +1,21 @@
+[project]
+name = "tts-mqtt-server"
+version = "0.1.0"
+description = 'A TTS server listening to MQTT json on tts/behaviour of the following form { "text": "Hallo.", "id": "0" }'
+readme = "README.md"
+
+requires-python = ">=3.11"
+
+dependencies = [
+    "mytts>=1.0.0",
+    "paho-mqtt>=2.1.0",
+    "pygobject>=3.48.1",
+]
+
+[tool.uv.workspace]
+members = [
+    "mytts",
+]
+
+[tool.uv.sources]
+mytts = { workspace = true }

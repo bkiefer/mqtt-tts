@@ -1,5 +1,3 @@
-**/target
-**/gen-java
 .classpath
 .project
 .settings
@@ -19,3 +17,4 @@ nbactions.xml
 **/*.snm
 **/auto
 **/__pycache__
+uv.lock

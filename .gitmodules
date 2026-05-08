@@ -1,0 +1,4 @@
+[submodule "mytts"]
+	path = mytts
+	url = git@github.com:bkiefer/TTS.git
+	branch = minimal
