@@ -1,6 +1,5 @@
-#mqtt:
-#  host: localhost
-#  port: 1883
+mqtt:
+  host: host.docker.internal
 
 #model_name: tts_models/en/ljspeech/tacotron2-DDC
 model_name: tts_models/fr/css10/vits
