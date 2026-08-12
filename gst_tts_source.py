@@ -2,6 +2,10 @@ import time
 import gi
 import numpy as np
 from time import sleep as _sleep
+import logging
+
+logger: logging.Logger
+logger = logging.getLogger(__file__)
 
 gi.require_version("Gst", "1.0")
 gi.require_version("GstApp", "1.0")
@@ -43,12 +47,12 @@ class GStreamerSource(object):
         t = message.type
         if t == Gst.MessageType.EOS:
             self.player.set_state(Gst.State.NULL)
-            print("EOS")
+            logger.debug("EOS")
             self.callback()
         elif t == Gst.MessageType.ERROR:
             self.player.set_state(Gst.State.NULL)
             err, debug = message.parse_error()
-            print("Error: %s" % err, debug)
+            logger.error(f"Error: {err}, {debug}")
             self.callback()
 
     def send_chunk(self, buffer, duration_ms=0):
@@ -127,7 +131,7 @@ class GStreamerSource(object):
 
 
 def test(data, size):
-    print("streaming finished ")
+    logger.debug("streaming finished ")
 
 if __name__ == '__main__':
     gms = GStreamerSource(callback=test)

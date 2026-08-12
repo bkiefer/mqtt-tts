@@ -8,5 +8,5 @@ coqui:
   model_name: tts_models/fr/css10/vits
 
 kikiri:
-  lang_code: de_DE
-  voice_name: martin
+  lang_code: f
+  voice_name: ff_siwis

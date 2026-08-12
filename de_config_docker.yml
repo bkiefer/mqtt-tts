@@ -1,5 +1,5 @@
-#mqtt:
-#  host: localhost
+mqtt:
+  host: host.docker.internal # running in isolated docker
 #  port: 1883
 
 coqui:

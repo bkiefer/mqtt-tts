@@ -8,14 +8,20 @@ requires-python = ">=3.11"
 
 dependencies = [
     "mytts>=1.0.0",
+    "kokoro-deutsch>0.1.0",
+    "torch<2.8.0",
     "paho-mqtt>=2.1.0",
     "pygobject>=3.48.1",
+    "prompt_toolkit"
 ]
 
 [tool.uv.workspace]
 members = [
     "mytts",
+    "kokoro-deutsch>0.1.0",
+    "kokoro[fr]"
 ]
 
 [tool.uv.sources]
 mytts = { workspace = true }
+kokoro-deutsch = { path = "kikiri-tts" }

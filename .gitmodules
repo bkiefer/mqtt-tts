@@ -2,3 +2,9 @@
 	path = mytts
 	url = git@github.com:bkiefer/TTS.git
 	branch = minimal
+[submodule "kikiri-tts"]
+	path = kikiri-tts
+	url = https://github.com/semidark/kikiri-tts.git
+[submodule "kokoro"]
+	path = kokoro
+	url = https://github.com/semidark/kokoro.git
