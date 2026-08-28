@@ -18,5 +18,5 @@ nbactions.xml
 **/auto
 **/__pycache__
 uv.lock
-models/.model_cache/**/[^.]*.*
+models/**
 outputs

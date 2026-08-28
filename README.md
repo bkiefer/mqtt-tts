@@ -18,8 +18,19 @@ sudo apt remove libcairo2-dev
 sudo apt autoremove
 ```
 
+# Creating a docker file instead (recommended)
+
+Make sure you have properly installed docker and your user is member of the `docker` group. Now execute
+
+    ./build_docker.sh
+
+To start the TTS server, execute `./run_docker.sh my_docker_config.sh`. Adapt the config files to your needs, and don't forget to download the necessary models beforehand.
+
+# Available TTS implementations
+
 Currently, this module offers you two options: coqui TTS and Kikiri TTS (kokoro including a german voice). The first forbids commercial applications, which is why the second alternative was added.
 
+## Kokoro / Kikiri models
 
 To download one of the non-German kokoro voices (e.g. if_sara (italian, female))
 
@@ -44,15 +55,17 @@ put the `.pth` files into the `models/.model_cache` folder and the `.pt` files i
 
 then put it into the models/.model_cache directory.
 
-To download the TTS model for coqui, do (Does not work, find another way)
+## Coqui
 
-    tts --text 'Dies ist ein Test' --model_name 'tts_models/de/thorsten/tacotron2-DDC'
+To download the TTS model for coqui, you first have to create the docker image. Select your model based on the `coqui_models.txt` file and execute for example
 
-This will generate a wav file that can be played to check if it works.
+    ./coqui_dld_model.sh 'tts_models/de/thorsten/tacotron2-DDC'
+
+This will place the necessary files into the `models` subdirectory, possibly into hidden subdirectories
 
 # Running the server
 
-Start your favorite MQTT broker first. Then:
+Start your favorite MQTT broker first. Then either start the docker container or locally:
 
     python3 tts-server.py
 
@@ -71,12 +84,3 @@ To check, if ReSpeaker is the default, use this;
 ```
 pacmd list-sinks | grep -e 'index:' -e device.string -e 'name:'
 ```
-
-
-
-# Training a new model
-
-docker run -ti --rm --gpus all --shm-size=32g --entrypoint /bin/bash -v `pwd`:/local/ ghcr.io/coqui-ai/tts
-# im docker
-cd /local/speedy_speech
-CUDA_VISIBLE_DEVICES="0, 1, 2, 3" python3 -m trainer.distribute --script train_speedy_speech.py

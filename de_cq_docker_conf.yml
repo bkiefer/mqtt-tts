@@ -1,0 +1,11 @@
+mqtt:
+  host: host.docker.internal # running in isolated docker
+#  port: 1883
+
+coqui:
+  # locally downloaded model, works also for run_docker.sh
+  model_name: tts_models/de/thorsten/tacotron2-DDC
+
+# kikiri:
+#   lang_code: de_DE
+#   voice_name: martin

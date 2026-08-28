@@ -8,6 +8,8 @@ if test -z "$1"; then
 fi
 if test -n "$2"; then
     name="--name $2"
+else
+    name="--name tts_server"
 fi
 docker run --rm $name \
        --device /dev/snd --group-add audio \

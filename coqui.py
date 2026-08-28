@@ -6,13 +6,25 @@ logger = logging.getLogger(__file__)
 
 class coqui_tts:
 
-    def __init__(self, model_name, device="cpu"):
-        self.model_name = model_name
-        logger.info(f"Initializing coqui voice {model_name} on {device}")
-        self.tts = TTS(model_name=self.model_name,
-                       progress_bar=False).to(device)
+    def __init__(self, config):
+        device = config.get("device", "cpu")
+        red_conf = {k: config[k] for k in ['model_name',
+                                           'vocoder_path', 'vocoder_config_path',
+                                           'model_path', 'config_path']
+                                 if k in config}
+        red_conf['progress_bar'] = False
+
+        name = red_conf.get('model_name') or red_conf.get('model_path')
+        logger.info(f"Initializing coqui voice {name} on {device}")
+        self.model = TTS(**red_conf).to(device)
 
     def tts(self, text):
-        audio = self.tts.tts(text=text)
+        audio = self.model.tts(text=text)
         duration_ms = 0.1 + len(audio)/22.050
         return (audio, duration_ms)
+
+if __name__ == '__main__':
+    #import os
+    #os.environ['TTS_HOME'] = './models'
+    c_tts = coqui_tts({'model_name': 'tts_models/de/thorsten/tacotron2-DDC'})
+    c_tts.tts("Hallo, Welt!")

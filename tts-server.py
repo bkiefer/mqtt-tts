@@ -71,14 +71,11 @@ class MqttTTSServer(MqttClient):
       lang = conf.get("lang_code","d")
       voice = conf.get("voice_name", "martin")
       device = conf.get("device", "cpu")
-      self.tts = kikiriki(lang, voice, device)
+      self.tts_module = kikiriki(lang, voice, device)
     elif "coqui" in config:
       conf = config['coqui']
-      model_name = conf.get('model_name',
-                            "tts_models/de/thorsten/tacotron2-DDC")
-      device = conf.get("device", "cpu")
 
-      self.tts = coqui_tts(model_name, device)
+      self.tts_module = coqui_tts(config['coqui'])
     else:
       logger.error("No usable TTS section found (either kikiri or coqui)")
       sys.exit(1)
@@ -86,7 +83,7 @@ class MqttTTSServer(MqttClient):
 
   @time_it(logger.debug)
   def _timed_tts(self, text):
-    return self.tts.tts(text)
+    return self.tts_module.tts(text)
 
   def _tts(self, text: str, id: str):
     # Run TTS

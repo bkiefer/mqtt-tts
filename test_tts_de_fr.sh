@@ -47,13 +47,13 @@ run() {
 rm log.log 2>&1
 if test -z "$1" -o "$1" = "-d"; then
     run de_config
-    uv run mqtt_client.py -t tts/behaviour '{ "id": 0, "text": "Das ist ein von Martin gesprochener Text" }'
+    ./send_text.sh "Das ist ein von Martin gesprochener Text"
     uv run mqtt_client.py -t tts/control "exit"
     wait_alive de_config
 fi
 
 if test -z "$1" -o "$1" = "-f"; then
     run fr_config
-    uv run mqtt_client.py -t tts/behaviour '{ "id": 0, "text": "C'\''est un texte rit d'\''une femme virtuelle pour vous seule." }'
+    ./send_text.sh "C'\''est un texte rit d'\''une femme virtuelle pour vous seule."
     uv run mqtt_client.py -t tts/control "exit"
 fi
