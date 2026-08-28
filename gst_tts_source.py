@@ -16,8 +16,6 @@ from gi.repository import Gst, GstApp, GLib
 
 # gst-launch-1.0 appsrc ! audioconvert ! audio/x-raw,format=S16LE,channels=1,rate=16000 ! fakesink silent = TRUE
 
-PIPELINE = """appsrc name=src ! audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved ! audioconvert ! pulsesink"""
-CAPS = "audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved"
 
 def ndarray_to_gst_buffer(arr: list[np.float32]) -> Gst.Buffer:
     """Convert numpy array to Gst.Buffer"""
@@ -28,13 +26,19 @@ def ndarray_to_gst_buffer(arr: list[np.float32]) -> Gst.Buffer:
 
 
 class GStreamerSource(object):
-    def __init__(self, callback=lambda : True):
+    PIPELINE = """appsrc name=src ! audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved ! audioconvert ! pulsesink"""
+
+    def __init__(self, callback=lambda : True,
+                 pipeline= None):
         Gst.init(None)
+
         self._wait = True
         self.callback = callback
         self.main_loop = GLib.MainLoop()
 
-        self.player = Gst.parse_launch(PIPELINE)
+        if not pipeline:
+            pipeline = GStreamerSource.PIPELINE
+        self.player = Gst.parse_launch(GStreamerSource.PIPELINE)
         self.player.set_auto_flush_bus(True)
         self.appsrc = self.player.get_by_name("src")
 
@@ -80,6 +84,9 @@ class GStreamerSource(object):
 
 ####### Unused code, several attempts to make it work or test gstreamer #####
 
+class GStreamerNonWorkingSource(object):
+    CAPS = "audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved"
+
     def create_pipeline(self):
         """ Create a pipeline "by hand" """
         self.player = Gst.Pipeline.new("player")
@@ -97,7 +104,7 @@ class GStreamerSource(object):
     def tts_source(self):
         self.appsrc = Gst.ElementFactory.make("appsrc", "app-source")
         self.appsrc.set_property("block", False)
-        caps = Gst.Caps.from_string(CAPS)
+        caps = Gst.Caps.from_string(GStreamerNonWorkingSource.CAPS)
         self.appsrc.set_property("caps", caps)
 
     def test_source(self):

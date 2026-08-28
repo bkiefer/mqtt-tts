@@ -11,7 +11,7 @@ if test -n "$2"; then
 else
     name="--name tts_server"
 fi
-docker run --rm $name \
+docker run -d --rm $name \
        --device /dev/snd --group-add audio \
        -e PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native \
        --add-host host.docker.internal:host-gateway \
