@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 
 . utils.sh
 
@@ -21,25 +21,36 @@ wait_until_alive() {
     done
 }
 
+docker_alive() {
+    try=1
+    until docker logs "$name" | grep -q 'TTS initialized'; do
+        if test "$try" = "$1"; then return 1; fi
+        docker logs "$name" 2>&1 >/dev/null || cleanup "$name"
+        echo -n $try
+        try=$(($try+1))
+        sleep 5
+    done
+}
+
+alive() {
+    try=1
+    until grep -q 'TTS initialized' log.log; do
+        if test "$try" = "$1"; then return 1; fi
+        echo -n $try
+        try=$(($try+1))
+        sleep 5
+    done
+}
+
 run() {
     if docker images | grep -q $(getimage); then
         name="tts_$1"
         ./run_docker.sh "$1_docker.yml" "$name" &
         wait_until_alive "$name"
-        try=1
-        until docker logs "$name" | grep -q 'TTS initialized'; do
-            docker logs "$name" 2>&1 >/dev/null || cleanup "$name"
-            echo -n $try
-            try=$(($try+1))
-            sleep 5
-        done
+        docker_alive
     else
         ./run.sh "$1.yml" | tee log.log &
-        until grep -q 'TTS initialized' log.log; do
-            echo -n $try
-            try=$(($try+1))
-            sleep 5
-        done
+        alive
         rm log.log
     fi
 }

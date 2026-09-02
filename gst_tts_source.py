@@ -38,7 +38,7 @@ class GStreamerSource(object):
 
         if not pipeline:
             pipeline = GStreamerSource.PIPELINE
-        self.player = Gst.parse_launch(GStreamerSource.PIPELINE)
+        self.player = Gst.parse_launch(pipeline)
         self.player.set_auto_flush_bus(True)
         self.appsrc = self.player.get_by_name("src")
 

@@ -2,10 +2,15 @@ mqtt:
   host: host.docker.internal # running in isolated docker
 #  port: 1883
 
-coqui:
-  #model_name: tts_models/en/ljspeech/tacotron2-DDC
-  #model_name: tts_models/de/thorsten/tacotron2-DDC
-  model_name: tts_models/fr/css10/vits
+# Adapt sink if necessary to audio system setup, the first line is the default
+#pipeline: "appsrc name=src ! audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved ! audioconvert ! pulsesink"
+#pipeline: "appsrc name=src ! audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved ! audioconvert ! alsasink device=plughw:1,0"
+
+# Use only one !
+#coqui:
+#  #model_name: tts_models/en/ljspeech/tacotron2-DDC
+#  #model_name: tts_models/de/thorsten/tacotron2-DDC
+#  model_name: tts_models/fr/css10/vits
 
 kikiri:
   lang_code: f

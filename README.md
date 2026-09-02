@@ -22,7 +22,7 @@ sudo apt autoremove
 
 Make sure you have properly installed docker and your user is member of the `docker` group. Now execute
 
-    ./build_docker.sh
+    ./build_docker.sh -u
 
 To start the TTS server, execute `./run_docker.sh my_docker_config.sh`. Adapt the config files to your needs, and don't forget to download the necessary models beforehand.
 

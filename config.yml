@@ -2,14 +2,24 @@
 #  host: localhost
 #  port: 1883
 
-# Adapt sink if necessary to audio system setup
+# Adapt sink if necessary to audio system setup, the first line is the default
 #pipeline: "appsrc name=src ! audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved ! audioconvert ! pulsesink"
 
-# coqui:
-#   #model_name: tts_models/en/ljspeech/tacotron2-DDC
-#   model_name: tts_models/de/thorsten/tacotron2-DDC
-#   #model_name: tts_models/fr/css10/vits
+# This pipeline "manually" converts the audio to the format that is digested
+# by a Sennheiser PC 8 headset (48kHz stereo), 1. mono->stereo, 2. resampling
+#pipeline: "appsrc name=src ! audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved ! audioconvert ! audio/x-raw,format=S16LE,channels=2 ! audioresample ! audio/x-raw,rate=48000 ! alsasink device=hw:1,0"
 
-kikiri:
-  lang_code: de_DE
-  voice_name: martin
+# pipeline for a ReSpeaker v2.0 using alsa
+#pipeline: "appsrc name=src ! audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved ! audioconvert ! audio/x-raw,format=S16LE,channels=2 ! audioresample ! audio/x-raw,rate=16000 ! alsasink device=plughw:5,0"
+
+# pipeline for a ReSpeaker v2.0 using alsa, simpler version
+pipeline: "appsrc name=src ! audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved ! audioconvert ! alsasink device=plughw:5,0"
+
+coqui:
+  #model_name: tts_models/en/ljspeech/tacotron2-DDC
+  model_name: tts_models/de/thorsten/tacotron2-DDC
+  #model_name: tts_models/fr/css10/vits
+
+# kikiri:
+#   lang_code: de_DE
+#   voice_name: martin
