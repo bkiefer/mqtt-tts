@@ -93,7 +93,8 @@ class MqttTTSServer(MqttClient):
     else:
       audio, duration_ms = self._timed_tts(text)
       if audio is not None:
-        GStreamerSource().send_chunk(audio, duration_ms=int(duration_ms))
+        GStreamerSource(pipeline = config.get('pipeline', None)) \
+            .send_chunk(audio, duration_ms=int(duration_ms))
     self.tts_end(id)
 
   def tts_start(self, id):

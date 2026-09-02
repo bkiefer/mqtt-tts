@@ -162,8 +162,8 @@ class kikiriki:
                 duration_ms = len(combined) / 24.000
             else:
                 logger.warn("No audio generated")
-                return None, None
+                return None, 0.0
         except Exception as e:
             logger.error(f"Erro {e}")
-            return None, None
+            return None, 0.0
         return (combined, duration_ms)

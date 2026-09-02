@@ -2,10 +2,13 @@
 #  host: localhost
 #  port: 1883
 
-coqui:
-  #model_name: tts_models/en/ljspeech/tacotron2-DDC
-  #model_name: tts_models/de/thorsten/tacotron2-DDC
-  model_name: tts_models/fr/css10/vits
+# Adapt sink if necessary to audio system setup
+#pipeline: "appsrc name=src ! audio/x-raw,format=S16LE,channels=1,rate=22050,layout=interleaved ! audioconvert ! pulsesink"
+
+# coqui:
+#   #model_name: tts_models/en/ljspeech/tacotron2-DDC
+#   model_name: tts_models/de/thorsten/tacotron2-DDC
+#   #model_name: tts_models/fr/css10/vits
 
 kikiri:
   lang_code: de_DE
