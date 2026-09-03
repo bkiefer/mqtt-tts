@@ -4,7 +4,7 @@ version = "0.2.0"
 description = 'A TTS server listening to MQTT json on tts/behaviour of the following form { "text": "Hallo.", "id": "0" }'
 readme = "README.md"
 
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.12"
 
 dependencies = [
     "mytts>=1.0.0",
