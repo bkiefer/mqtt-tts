@@ -53,7 +53,7 @@ VOICES = {
                 'voice_filename': "voices/martin.pt" }
 }
 MODEL_CACHE_DIR = "models/.model_cache"
-DEFAULT_DE_CONFIG = "kikiri-tts/training/config.json"
+DEFAULT_DE_CONFIG = "models/.model_cache/config.json"
 
 def download_reference_file(repo: str, filename: str,
                             cache_dir: str = MODEL_CACHE_DIR) -> Path:
